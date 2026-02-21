@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnQuest - Grade 10 CBSE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="quiz-styles.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <span class="logo">🎮 LearnQuest</span>
+            <span class="level-badge" id="userLevel">Level 1</span>
+        </div>
+        <div class="nav-menu">
+            <a href="#" class="nav-item active" onclick="showSection('dashboard')">Dashboard</a>
+            <a href="#" class="nav-item" onclick="showSection('subjects')">My Subjects</a>
+            <a href="#" class="nav-item" onclick="showSection('achievements')">Achievements</a>
+            <a href="#" class="nav-item" onclick="showSection('leaderboard')">Leaderboard</a>
+        </div>
+        <div class="header-right">
+            <div class="xp-display">
+                <span class="xp-icon">⭐</span>
+                <span id="totalXP">0 XP</span>
+            </div>
+            <div class="streak-display">
+                <span>🔥</span>
+                <span id="streakDays">0</span>
+            </div>
+            <div class="user-avatar" onclick="toggleProfile()">
+                <span id="userInitial">S</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section active">
+            <div class="welcome-card">
+                <h1>Welcome back, <span id="userName">Saqib</span>! 🚀</h1>
+                <p class="motivational-quote" id="dailyQuote">Keep pushing forward! Every chapter you complete brings you closer to your goals.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📚</div>
+                    <div class="stat-info">
+                        <h3>Chapters Completed</h3>
+                        <p><span id="chaptersCompleted">0</span> <span class="sub-text">/ 85</span></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">⏱️</div>
+                    <div class="stat-info">
+                        <h3>Study Time</h3>
+                        <p><span id="studyHours">0</span> <span class="sub-text">hours</span></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">🎯</div>
+                    <div class="stat-info">
+                        <h3>Daily Goal</h3>
+                        <p><span id="dailyProgress">0</span><span class="sub-text">%</span></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">🏆</div>
+                    <div class="stat-info">
+                        <h3>Achievements</h3>
+                        <p><span id="achievementCount">0</span> <span class="sub-text">/ 24</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="left-column">
+                    <div class="section-title">Quick Actions</div>
+                    <div class="quick-actions">
+                        <button class="action-btn primary" onclick="startStudySession()">
+                            <span class="btn-icon">📖</span>
+                            <span>Start Study Session</span>
+                        </button>
+                        <button class="action-btn secondary" onclick="takeQuiz()">
+                            <span class="btn-icon">📝</span>
+                            <span>Take Quiz</span>
+                        </button>
+                        <button class="action-btn tertiary" onclick="reviewProgress()">
+                            <span class="btn-icon">📊</span>
+                            <span>Review Progress</span>
+                        </button>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 30px;">Your Subjects</div>
+                    <div class="subjects-compact" id="subjectsCompact"></div>
+                </div>
+
+                <div class="right-column">
+                    <div class="sidebar-card">
+                        <div class="section-title">Today's Goals 🎯</div>
+                        <div class="goal-list" id="todayGoals"></div>
+                        <button class="add-goal-btn" onclick="addGoal()">+ Add Goal</button>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="section-title">Recent Achievements 🏆</div>
+                        <div id="recentAchievements"></div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="section-title">Weekly Challenge 🌟</div>
+                        <div class="challenge-card">
+                            <h4>Complete 10 chapters this week</h4>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill challenge" id="weeklyChallenge" style="width: 0%;"></div>
+                            </div>
+                            <p class="challenge-reward">Reward: +500 XP + Golden Badge</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Section -->
+        <div id="subjects-section" class="section">
+            <div class="section-title">Grade 10 CBSE Subjects</div>
+            <div class="subjects-grid-detailed" id="subjectsDetailed"></div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div id="achievements-section" class="section">
+            <div class="section-title">Your Achievements</div>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div id="leaderboard-section" class="section">
+            <div class="section-title">Leaderboard</div>
+            <div class="leaderboard-info">
+                <p>Compare your progress with other students (simulated data for motivation)</p>
+            </div>
+            <div class="leaderboard-table" id="leaderboardTable"></div>
+        </div>
+    </div>
+
+    <!-- Study Session Modal -->
+    <div id="studyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start Study Session</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+    <script src="app-quiz.js"></script>
+</body>
+</html>

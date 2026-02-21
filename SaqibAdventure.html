@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 12th - CBSE Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-left {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .nav-item:hover {
+            opacity: 0.8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f97316;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title-section h1 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .title-section .subtitle {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .stat-icon.green {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .stat-icon.cyan {
+            background: #cffafe;
+            color: #06b6d4;
+        }
+
+        .stat-icon.purple {
+            background: #e0e7ff;
+            color: #6366f1;
+        }
+
+        .stat-info h3 {
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-info .sub-text {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-all {
+            color: #2563eb;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .subject-card.physics {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .subject-card.chemistry {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+        }
+
+        .subject-card.mathematics {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .subject-card.biology {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .subject-card.social {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .subject-card.english {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .subject-icon {
+            font-size: 40px;
+        }
+
+        .subject-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .subject-info p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .subject-button {
+            background: white;
+            color: #2563eb;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .subject-card.physics .subject-button {
+            color: #06b6d4;
+        }
+
+        .subject-card.chemistry .subject-button {
+            color: #f97316;
+        }
+
+        .subject-card.mathematics .subject-button {
+            color: #10b981;
+        }
+
+        .subject-card.biology .subject-button {
+            color: #8b5cf6;
+        }
+
+        .assignments-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .assignment-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+        }
+
+        .assignment-bullet {
+            width: 6px;
+            height: 6px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+
+        .assignment-text {
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .study-resources {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .resource-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .resource-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .resource-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .resource-btn.ncert {
+            background: #cffafe;
+            color: #06b6d4;
+        }
+
+        .resource-btn.samples {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .sidebar-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .test-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .test-item:last-child {
+            border-bottom: none;
+        }
+
+        .test-subject {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .test-date {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .progress-chart {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .legend-color.physics-color {
+            background: #3b82f6;
+        }
+
+        .legend-color.math-color {
+            background: #10b981;
+        }
+
+        .progress-bars {
+            margin-top: 15px;
+        }
+
+        .progress-item {
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .progress-values {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .progress-bar-fill.physics {
+            background: #3b82f6;
+        }
+
+        .progress-bar-fill.mathematics {
+            background: #10b981;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">Welcome, Saqib!</div>
+        <div class="nav-menu">
+            <a href="#" class="nav-item">Dashboard</a>
+            <a href="#" class="nav-item">My Subjects</a>
+            <a href="#" class="nav-item">Assignments</a>
+            <a href="#" class="nav-item">Resources</a>
+        </div>
+        <div class="header-right">
+            <div class="notification-icon">🔔</div>
+            <div class="user-avatar">S</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="title-section">
+            <h1>Class 12<sup>th</sup> - CBSE</h1>
+            <p class="subtitle">Science Stream</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">📅</div>
+                <div class="stat-info">
+                    <h3>Upcoming Tests</h3>
+                    <p>2 <span class="sub-text">Tests</span></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">📋</div>
+                <div class="stat-info">
+                    <h3>Assignments Due</h3>
+                    <p>3 <span class="sub-text">Pending</span></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon cyan">📚</div>
+                <div class="stat-info">
+                    <h3>Study Materials</h3>
+                    <p>12 <span class="sub-text">Resources</span></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">📊</div>
+                <div class="stat-info">
+                    <h3>Overall Progress</h3>
+                    <p>82<span class="sub-text">%</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-column">
+                <div class="section-title">
+                    My Subjects
+                </div>
+                <div class="subjects-grid">
+                    <div class="subject-card physics">
+                        <div class="subject-icon">⚛️</div>
+                        <div class="subject-info">
+                            <h3>Physics</h3>
+                            <p>14/20 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card chemistry">
+                        <div class="subject-icon">🧪</div>
+                        <div class="subject-info">
+                            <h3>Chemistry</h3>
+                            <p>14/16 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card mathematics">
+                        <div class="subject-icon">📐</div>
+                        <div class="subject-info">
+                            <h3>Mathematics</h3>
+                            <p>12/16 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card biology">
+                        <div class="subject-icon">🧬</div>
+                        <div class="subject-info">
+                            <h3>Biology</h3>
+                            <p>9/16 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card social">
+                        <div class="subject-icon">🌍</div>
+                        <div class="subject-info">
+                            <h3>Social Science</h3>
+                            <p>12/14 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+
+                    <div class="subject-card english">
+                        <div class="subject-icon">📖</div>
+                        <div class="subject-info">
+                            <h3>English</h3>
+                            <p>18/21 Chapters Completed</p>
+                            <button class="subject-button">View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assignments-section">
+                    <div class="section-title">
+                        Recent Assignments
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="assignment-item">
+                        <div class="assignment-bullet"></div>
+                        <div class="assignment-text">Chemistry - Organic Compounds</div>
+                    </div>
+                    <div class="assignment-item">
+                        <div class="assignment-bullet"></div>
+                        <div class="assignment-text">Physics - Laws of Motion</div>
+                    </div>
+                </div>
+
+                <div class="study-resources">
+                    <div class="section-title">Study Resources</div>
+                    <div class="resource-buttons">
+                        <div class="resource-btn ncert">
+                            📘 NCERT Solutions
+                        </div>
+                        <div class="resource-btn samples">
+                            📄 Sample Papers
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="sidebar-card">
+                    <div class="section-title">
+                        Upcoming Tests
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="test-item">
+                        <div class="test-subject">Physics - Chapter 5</div>
+                        <div class="test-date">Date: 12th Aug, 2021</div>
+                    </div>
+                    <div class="test-item">
+                        <div class="test-subject">Mathematics - Differential Calculus</div>
+                        <div class="test-date">Date: 18th Aug, 2021</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="section-title">
+                        Progress Analysis
+                        <span style="font-size: 18px; cursor: pointer;">📊</span>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color physics-color"></div>
+                            <span>Physics</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color math-color"></div>
+                            <span>Mathematics</span>
+                        </div>
+                    </div>
+                    <div class="progress-bars">
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Physics</span>
+                                <div class="progress-values">
+                                    <span>72</span>
+                                    <span>81</span>
+                                    <span>78</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill physics" style="width: 78%;"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Mathematics</span>
+                                <div class="progress-values">
+                                    <span>81%</span>
+                                    <span>91%</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill mathematics" style="width: 91%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBSE Class 12 - Learning Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .subject-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border-left: 5px solid;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+        }
+
+        .subject-card.physics {
+            border-left-color: #f39c12;
+        }
+
+        .subject-card.chemistry {
+            border-left-color: #e74c3c;
+        }
+
+        .subject-card.mathematics {
+            border-left-color: #3498db;
+        }
+
+        .subject-card.english {
+            border-left-color: #2ecc71;
+        }
+
+        .subject-card.computer {
+            border-left-color: #9b59b6;
+        }
+
+        .subject-card.economics {
+            border-left-color: #1abc9c;
+        }
+
+        .subject-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .subject-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subject-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .exam-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .exam-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .exam-subject {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .exam-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📚 LearnHub</div>
+            <div class="user-info">
+                <div>
+                    <div class="user-name">Raj Sharma</div>
+                    <div style="font-size: 14px; color: #666;">Class 12th - Science</div>
+                </div>
+                <div class="user-avatar">RS</div>
+            </div>
+        </div>
+
+        <div class="welcome-section">
+            <h1>Welcome back, Raj! 👋</h1>
+            <p>You're doing great! Keep up the excellent work towards your board exams.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div>
+                <div class="subjects-grid">
+                    <div class="subject-card physics">
+                        <div class="subject-icon">⚛️</div>
+                        <div class="subject-name">Physics</div>
+                        <div style="color: #666; font-size: 14px;">24 chapters • 156 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 68%;"></div>
+                            </div>
+                            <div class="progress-text">68%</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-card chemistry">
+                        <div class="subject-icon">🧪</div>
+                        <div class="subject-name">Chemistry</div>
+                        <div style="color: #666; font-size: 14px;">16 chapters • 142 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 72%;"></div>
+                            </div>
+                            <div class="progress-text">72%</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-card mathematics">
+                        <div class="subject-icon">📐</div>
+                        <div class="subject-name">Mathematics</div>
+                        <div style="color: #666; font-size: 14px;">13 chapters • 98 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%;"></div>
+                            </div>
+                            <div class="progress-text">85%</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-card english">
+                        <div class="subject-icon">📖</div>
+                        <div class="subject-name">English</div>
+                        <div style="color: #666; font-size: 14px;">8 chapters • 64 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 58%;"></div>
+                            </div>
+                            <div class="progress-text">58%</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-card computer">
+                        <div class="subject-icon">💻</div>
+                        <div class="subject-name">Computer Science</div>
+                        <div style="color: #666; font-size: 14px;">12 chapters • 89 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 91%;"></div>
+                            </div>
+                            <div class="progress-text">91%</div>
+                        </div>
+                    </div>
+
+                    <div class="subject-card economics">
+                        <div class="subject-icon">💰</div>
+                        <div class="subject-name">Economics</div>
+                        <div style="color: #666; font-size: 14px;">10 chapters • 76 topics</div>
+                        <div class="subject-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 64%;"></div>
+                            </div>
+                            <div class="progress-text">64%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <div class="card-title">📅 Upcoming Tests</div>
+                    <div class="exam-item">
+                        <div class="exam-subject">Physics Unit Test</div>
+                        <div class="exam-date">March 5, 2026</div>
+                    </div>
+                    <div class="exam-item">
+                        <div class="exam-subject">Mathematics Mock Test</div>
+                        <div class="exam-date">March 12, 2026</div>
+                    </div>
+                    <div class="exam-item">
+                        <div class="exam-subject">Chemistry Pre-Board</div>
+                        <div class="exam-date">March 18, 2026</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Your Stats</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">47</div>
+                            <div class="stat-label">Study Hours</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Tests Taken</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">87%</div>
+                            <div class="stat-label">Avg Score</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏆 Achievements</div>
+                    <div>
+                        <span class="achievement-badge">🔥 7 Day Streak</span>
+                        <span class="achievement-badge">⭐ Top Scorer</span>
+                        <span class="achievement-badge">📚 Bookworm</span>
+                        <span class="achievement-badge">💯 Perfect Test</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
