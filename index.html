@@ -6,8 +6,119 @@
     <title>LearnQuest - Grade 10 CBSE</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="quiz-styles.css">
+    <link rel="stylesheet" href="auth-styles.css">
+
+    <!-- AWS Amplify SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/aws-amplify.min.js"></script>
 </head>
 <body>
+    <!-- Authentication Modal -->
+    <div id="auth-container" class="auth-modal">
+        <div class="auth-card">
+            <h2 id="auth-title">Welcome to LearnQuest 🎮</h2>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form-container active">
+                <form class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="auth-error" id="login-error"></div>
+
+                    <div class="auth-input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" class="auth-input"
+                               placeholder="your.email@example.com" required>
+                    </div>
+
+                    <div class="auth-input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" class="auth-input"
+                               placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="auth-button auth-button-primary">
+                        Login
+                    </button>
+
+                    <div class="auth-link">
+                        <a href="#" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-form-container">
+                <form class="auth-form" onsubmit="handleSignup(event)">
+                    <div class="auth-error" id="signup-error"></div>
+                    <div class="auth-success" id="signup-success"></div>
+
+                    <div class="auth-input-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" class="auth-input"
+                               placeholder="Enter your name" required>
+                    </div>
+
+                    <div class="auth-input-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" class="auth-input"
+                               placeholder="your.email@example.com" required>
+                    </div>
+
+                    <div class="auth-input-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" class="auth-input"
+                               placeholder="Create a strong password" required
+                               oninput="checkPasswordStrength(this.value)">
+                        <div class="password-requirements">
+                            Must be at least 8 characters with uppercase, lowercase, and numbers
+                        </div>
+                        <div class="password-strength">
+                            <div id="password-strength-bar" class="password-strength-bar"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-button auth-button-primary">
+                        Create Account
+                    </button>
+                </form>
+
+                <!-- Email Verification Section -->
+                <div id="verification-section" class="verification-section">
+                    <h4>Verify Your Email</h4>
+                    <p>Enter the verification code sent to your email:</p>
+                    <div class="auth-input-group">
+                        <input type="text" id="verification-code" class="auth-input"
+                               placeholder="Enter 6-digit code" maxlength="6">
+                    </div>
+                    <button class="auth-button auth-button-primary" onclick="handleVerification()">
+                        Verify Email
+                    </button>
+                    <div class="auth-link">
+                        <a href="#" onclick="resendVerificationCode(); return false;">Resend Code</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Migration Section (shown after login if local data exists) -->
+            <div id="migrate-section" class="migrate-section" style="display: none;">
+                <h4>📦 Local Data Found</h4>
+                <p>Would you like to sync your local progress to the cloud?</p>
+                <button class="auth-button auth-button-primary" onclick="handleDataMigration()">
+                    Sync to Cloud
+                </button>
+                <button class="auth-button auth-button-secondary" onclick="skipMigration()">
+                    Skip for Now
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                <p>Your progress will be saved in the cloud and accessible from any device.</p>
+            </div>
+        </div>
+    </div>
     <div class="header">
         <div class="header-left">
             <span class="logo">🎮 LearnQuest</span>
@@ -154,6 +265,9 @@
         </div>
     </div>
 
+    <script src="amplify-config.js"></script>
+    <script src="graphql-queries.js"></script>
+    <script src="data-service.js"></script>
     <script src="questions.js"></script>
     <script src="app.js"></script>
     <script src="app-quiz.js"></script>

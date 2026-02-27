@@ -309,7 +309,7 @@ function retakeQuiz() {
 }
 
 // Complete chapter after passing quiz
-function completeChapter() {
+async function completeChapter() {
     const subject = subjects[currentQuiz.subject];
     const progress = userData.subjectProgress[currentQuiz.subject];
     const chapterNum = currentQuiz.chapter;
@@ -345,11 +345,15 @@ function completeChapter() {
         date: new Date().toISOString()
     };
 
+    // Save quiz result to backend
+    const timeTaken = Math.floor((currentQuiz.endTime - currentQuiz.startTime) / 1000);
+    await dataService.saveQuizResult(currentQuiz.subject, chapterNum, currentQuiz.score, timeTaken);
+
     // Check achievements
     checkAchievements();
 
     // Save and update
-    saveUserData();
+    await saveUserData();
     updateUI();
     closeModal();
 

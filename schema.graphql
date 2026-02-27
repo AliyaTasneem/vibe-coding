@@ -1,0 +1,192 @@
+# GraphQL Schema for LearnQuest
+
+type User @model @auth(rules: [
+  { allow: owner, ownerField: "userId", operations: [create, read, update, delete] }
+  { allow: private, operations: [read] }
+]) {
+  userId: ID! @primaryKey
+  email: String! @index(name: "byEmail")
+  name: String!
+  level: Int!
+  xp: Int!
+  streak: Int!
+  lastStudyDate: AWSDateTime
+  chaptersCompleted: Int!
+  studyHours: Float!
+  achievements: [String]
+  goals: AWSJSON
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+
+  progress: [UserProgress] @hasMany(indexName: "byUserId", fields: ["userId"])
+  quizResults: [QuizResult] @hasMany(indexName: "byUserId", fields: ["userId"])
+  userAchievements: [Achievement] @hasMany(indexName: "byUserId", fields: ["userId"])
+}
+
+type UserProgress @model @auth(rules: [
+  { allow: owner, ownerField: "userId", operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId", sortKeyFields: ["subject"])
+  subject: String!
+  completed: [Int]
+  timeSpent: Float!
+  updatedAt: AWSDateTime!
+
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type QuizResult @model @auth(rules: [
+  { allow: owner, ownerField: "userId", operations: [create, read, update, delete] }
+  { allow: private, operations: [read] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId")
+  quizId: String!
+  subject: String! @index(name: "bySubjectChapter", sortKeyFields: ["chapterNum", "score"])
+  chapterNum: Int!
+  score: Int!
+  attempts: Int
+  date: AWSDateTime!
+  timeTaken: Int
+
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type Achievement @model @auth(rules: [
+  { allow: owner, ownerField: "userId", operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId")
+  achievementId: String!
+  unlockedAt: AWSDateTime!
+  xpEarned: Int!
+
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type Goal @model @auth(rules: [
+  { allow: owner, ownerField: "userId", operations: [create, read, update, delete] }
+]) {
+  id: ID!
+  userId: ID! @index(name: "byUserId")
+  goalId: String!
+  text: String!
+  completed: Boolean!
+  date: AWSDateTime
+  createdAt: AWSDateTime!
+
+  user: User @belongsTo(fields: ["userId"])
+}
+
+type ChapterLeaderboard @model @auth(rules: [
+  { allow: private, operations: [read] }
+  { allow: private, provider: iam, operations: [create, update, delete] }
+]) {
+  id: ID!
+  subjectChapter: String! @index(name: "bySubjectChapter", sortKeyFields: ["rank"])
+  rank: Int!
+  userId: ID!
+  userName: String!
+  level: Int!
+  score: Int!
+  completedAt: AWSDateTime!
+}
+
+# Custom Query for Leaderboard
+type Query {
+  getLeaderboardForChapter(subject: String!, chapter: Int!): [ChapterLeaderboard]
+    @function(name: "getLeaderboard-${env}")
+    @auth(rules: [{ allow: private }])
+}
+
+# Subscription for real-time leaderboard updates
+type Subscription {
+  onLeaderboardUpdate(subjectChapter: String!): ChapterLeaderboard
+    @aws_subscribe(mutations: ["createChapterLeaderboard", "updateChapterLeaderboard"])
+}
+
+# Input types for mutations
+input CreateUserInput {
+  userId: ID!
+  email: String!
+  name: String!
+  level: Int!
+  xp: Int!
+  streak: Int!
+  chaptersCompleted: Int!
+  studyHours: Float!
+  achievements: [String]
+  goals: AWSJSON
+}
+
+input UpdateUserInput {
+  userId: ID!
+  email: String
+  name: String
+  level: Int
+  xp: Int
+  streak: Int
+  lastStudyDate: AWSDateTime
+  chaptersCompleted: Int
+  studyHours: Float
+  achievements: [String]
+  goals: AWSJSON
+}
+
+input CreateUserProgressInput {
+  userId: ID!
+  subject: String!
+  completed: [Int]
+  timeSpent: Float!
+}
+
+input UpdateUserProgressInput {
+  id: ID!
+  completed: [Int]
+  timeSpent: Float
+}
+
+input CreateQuizResultInput {
+  userId: ID!
+  quizId: String!
+  subject: String!
+  chapterNum: Int!
+  score: Int!
+  attempts: Int
+  date: AWSDateTime!
+  timeTaken: Int
+}
+
+input CreateAchievementInput {
+  userId: ID!
+  achievementId: String!
+  unlockedAt: AWSDateTime!
+  xpEarned: Int!
+}
+
+input CreateGoalInput {
+  userId: ID!
+  goalId: String!
+  text: String!
+  completed: Boolean!
+  date: AWSDateTime
+}
+
+input UpdateGoalInput {
+  id: ID!
+  text: String
+  completed: Boolean
+  date: AWSDateTime
+}
+
+input UpdateChapterLeaderboardInput {
+  id: ID!
+  subjectChapter: String
+  rank: Int
+  userId: ID
+  userName: String
+  level: Int
+  score: Int
+  completedAt: AWSDateTime
+}

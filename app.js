@@ -140,21 +140,40 @@ const motivationalQuotes = [
 ];
 
 // Initialize app
-function init() {
-    loadUserData();
+async function init() {
+    await dataService.init();
+
+    // Check authentication if backend is enabled
+    if (dataService.useBackend) {
+        try {
+            const { Auth } = Amplify;
+            const user = await Auth.currentAuthenticatedUser();
+            console.log('User is authenticated:', user.attributes.email);
+            document.getElementById('auth-container').classList.remove('show');
+
+            // Check for local data migration
+            checkForLocalDataMigration();
+        } catch (error) {
+            console.log('User not authenticated, showing login modal');
+            showAuthModal();
+            return; // Don't load app until authenticated
+        }
+    }
+
+    await loadUserData();
     updateUI();
     renderSubjects();
     renderAchievements();
-    renderLeaderboard();
+    await renderLeaderboard();
     updateStreak();
     showDailyQuote();
 }
 
-// Load user data from localStorage
-function loadUserData() {
-    const saved = localStorage.getItem('learnquest_user');
-    if (saved) {
-        userData = JSON.parse(saved);
+// Load user data from localStorage or backend
+async function loadUserData() {
+    const loaded = await dataService.loadUserData();
+    if (loaded) {
+        userData = loaded;
     } else {
         // Initialize subject progress
         for (let key in subjects) {
@@ -164,13 +183,13 @@ function loadUserData() {
                 timeSpent: 0
             };
         }
-        saveUserData();
+        await saveUserData();
     }
 }
 
-// Save user data to localStorage
-function saveUserData() {
-    localStorage.setItem('learnquest_user', JSON.stringify(userData));
+// Save user data to localStorage and backend
+async function saveUserData() {
+    await dataService.saveUserData(userData);
 }
 
 // Update UI elements
@@ -317,7 +336,7 @@ function loadChapters() {
 }
 
 // Start studying a chapter
-function startChapter(subjectKey, chapterNum) {
+async function startChapter(subjectKey, chapterNum) {
     const subject = subjects[subjectKey];
     const progress = userData.subjectProgress[subjectKey];
 
@@ -339,7 +358,7 @@ function startChapter(subjectKey, chapterNum) {
     checkAchievements();
 
     // Save and update
-    saveUserData();
+    await saveUserData();
     updateUI();
     closeModal();
 
@@ -475,7 +494,7 @@ function renderGoals() {
         : 0;
 }
 
-function addGoal() {
+async function addGoal() {
     const goalText = prompt('Enter your study goal for today:');
     if (goalText && goalText.trim()) {
         userData.goals.push({
@@ -483,22 +502,22 @@ function addGoal() {
             completed: false,
             date: new Date().toISOString()
         });
-        saveUserData();
+        await saveUserData();
         updateUI();
     }
 }
 
-function toggleGoal(index) {
+async function toggleGoal(index) {
     userData.goals[index].completed = !userData.goals[index].completed;
     if (userData.goals[index].completed) {
         addXP(20);
     }
-    saveUserData();
+    await saveUserData();
     updateUI();
 }
 
 // Update streak
-function updateStreak() {
+async function updateStreak() {
     const today = new Date().toDateString();
     const lastDate = userData.lastStudyDate ? new Date(userData.lastStudyDate).toDateString() : null;
 
@@ -519,7 +538,7 @@ function updateStreak() {
         }
 
         userData.lastStudyDate = new Date().toISOString();
-        saveUserData();
+        await saveUserData();
     }
 }
 
@@ -530,34 +549,133 @@ function updateWeeklyChallenge() {
 }
 
 // Render leaderboard
-function renderLeaderboard() {
+async function renderLeaderboard(subject = null, chapter = null) {
     const container = document.getElementById('leaderboardTable');
 
-    // Generate simulated leaderboard data
-    const leaderboard = [
-        { rank: 1, name: 'Priya Sharma', xp: userData.xp + 500, chapters: userData.chaptersCompleted + 15 },
-        { rank: 2, name: 'Rahul Verma', xp: userData.xp + 200, chapters: userData.chaptersCompleted + 8 },
-        { rank: 3, name: userData.name, xp: userData.xp, chapters: userData.chaptersCompleted, current: true },
-        { rank: 4, name: 'Ananya Singh', xp: userData.xp - 100, chapters: userData.chaptersCompleted - 3 },
-        { rank: 5, name: 'Arjun Patel', xp: userData.xp - 250, chapters: userData.chaptersCompleted - 7 }
-    ];
+    // Add subject/chapter selector if backend is enabled
+    if (dataService.useBackend && !subject) {
+        container.innerHTML = `
+            <div style="margin-bottom: 20px;">
+                <p style="color: #666; margin-bottom: 15px;">Select a subject and chapter to view the leaderboard:</p>
+                <select id="leaderboard-subject" class="subject-select" onchange="loadLeaderboardChapters()">
+                    <option value="">Choose a subject...</option>
+                    ${Object.keys(subjects).map(key =>
+                        `<option value="${key}">${subjects[key].name}</option>`
+                    ).join('')}
+                </select>
+                <div id="leaderboard-chapter-list" style="margin-top: 10px;"></div>
+            </div>
+            <div id="leaderboard-content"></div>
+        `;
+        return;
+    }
 
-    container.innerHTML = `
+    // Load leaderboard data
+    const leaderboard = await dataService.getLeaderboard(subject, chapter);
+
+    // Find current user in leaderboard
+    let currentUserId = null;
+    if (dataService.useBackend) {
+        try {
+            const { Auth } = Amplify;
+            const user = await Auth.currentAuthenticatedUser();
+            currentUserId = user.attributes.sub;
+        } catch (error) {
+            console.log('Could not get current user');
+        }
+    }
+
+    const contentContainer = subject ? document.getElementById('leaderboard-content') : container;
+    contentContainer.innerHTML = `
+        ${subject ? `<h3 style="margin-bottom: 15px;">${subjects[subject].name} - Chapter ${chapter}</h3>` : ''}
         <div class="leaderboard-row header">
             <div>Rank</div>
             <div>Name</div>
-            <div>XP</div>
-            <div>Chapters</div>
+            <div>${dataService.useBackend ? 'Score' : 'XP'}</div>
+            <div>${dataService.useBackend ? 'Level' : 'Chapters'}</div>
         </div>
-        ${leaderboard.map(user => `
-            <div class="leaderboard-row ${user.current ? 'current-user' : ''}">
-                <div class="rank ${user.rank === 1 ? 'first' : user.rank === 2 ? 'second' : user.rank === 3 ? 'third' : ''}">#${user.rank}</div>
-                <div>${user.name}${user.current ? ' (You)' : ''}</div>
-                <div>${user.xp} XP</div>
-                <div>${user.chapters}</div>
-            </div>
-        `).join('')}
+        ${leaderboard.map(user => {
+            const isCurrent = dataService.useBackend ? user.userId === currentUserId : user.current;
+            return `
+                <div class="leaderboard-row ${isCurrent ? 'current-user' : ''}" data-user-id="${user.userId || ''}">
+                    <div class="rank ${user.rank === 1 ? 'first' : user.rank === 2 ? 'second' : user.rank === 3 ? 'third' : ''}">#${user.rank}</div>
+                    <div>${user.name || user.userName}${isCurrent ? ' (You)' : ''}</div>
+                    <div>${user.score || user.xp}${dataService.useBackend ? '%' : ' XP'}</div>
+                    <div>${user.level || user.chapters}</div>
+                </div>
+            `;
+        }).join('')}
     `;
+
+    // Subscribe to real-time updates if backend is enabled
+    if (dataService.useBackend && subject && chapter) {
+        const subscription = dataService.subscribeToLeaderboard(subject, chapter, (update) => {
+            updateLeaderboardRow(update);
+        });
+
+        // Store subscription to clean up later
+        if (!window.leaderboardSubscriptions) {
+            window.leaderboardSubscriptions = [];
+        }
+        window.leaderboardSubscriptions.push(subscription);
+    }
+}
+
+// Load chapters for leaderboard selection
+function loadLeaderboardChapters() {
+    const select = document.getElementById('leaderboard-subject');
+    const subjectKey = select.value;
+    const chapterList = document.getElementById('leaderboard-chapter-list');
+
+    if (!subjectKey) {
+        chapterList.innerHTML = '';
+        return;
+    }
+
+    const subject = subjects[subjectKey];
+    const progress = userData.subjectProgress[subjectKey];
+
+    chapterList.innerHTML = '<div class="chapter-list">' +
+        subject.topics.map((topic, index) => {
+            const chapterNum = index + 1;
+            const isCompleted = progress.completed.includes(chapterNum);
+            return `
+                <div class="chapter-item ${!isCompleted ? 'disabled' : ''}"
+                     onclick="${isCompleted ? `renderLeaderboard('${subjectKey}', ${chapterNum})` : ''}">
+                    ${isCompleted ? '🏆' : '🔒'} Chapter ${chapterNum}: ${topic}
+                    ${!isCompleted ? '<br><small style="color: #999;">Complete this chapter to view leaderboard</small>' : ''}
+                </div>
+            `;
+        }).join('') +
+        '</div>';
+}
+
+// Update leaderboard row (real-time update)
+function updateLeaderboardRow(update) {
+    const row = document.querySelector(`[data-user-id="${update.userId}"]`);
+    if (row) {
+        // Update existing row
+        row.innerHTML = `
+            <div class="rank ${update.rank === 1 ? 'first' : update.rank === 2 ? 'second' : update.rank === 3 ? 'third' : ''}">#${update.rank}</div>
+            <div>${update.userName}</div>
+            <div>${update.score}%</div>
+            <div>${update.level}</div>
+        `;
+        // Highlight the updated row
+        row.style.animation = 'highlight 1s ease';
+        setTimeout(() => {
+            row.style.animation = '';
+        }, 1000);
+    } else {
+        // New entry, reload full leaderboard
+        const subjectSelect = document.getElementById('leaderboard-subject');
+        if (subjectSelect && subjectSelect.value) {
+            const match = subjectSelect.value.match(/(.+)#(\d+)/);
+            if (match) {
+                renderLeaderboard(match[1], parseInt(match[2]));
+            }
+        }
+    }
 }
 
 // Navigation
@@ -599,6 +717,247 @@ function toggleProfile() {
     alert('Profile settings coming soon!');
 }
 
+// ========== AUTHENTICATION FUNCTIONS ==========
+
+// Show authentication modal
+function showAuthModal() {
+    document.getElementById('auth-container').classList.add('show');
+}
+
+// Hide authentication modal
+function hideAuthModal() {
+    document.getElementById('auth-container').classList.remove('show');
+}
+
+// Switch between login and signup tabs
+function switchAuthTab(tab) {
+    // Update tabs
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form-container').forEach(f => f.classList.remove('active'));
+
+    if (tab === 'login') {
+        document.querySelector('.auth-tab:first-child').classList.add('active');
+        document.getElementById('login-form').classList.add('active');
+    } else {
+        document.querySelector('.auth-tab:last-child').classList.add('active');
+        document.getElementById('signup-form').classList.add('active');
+    }
+
+    // Clear errors
+    document.getElementById('login-error').classList.remove('show');
+    document.getElementById('signup-error').classList.remove('show');
+}
+
+// Handle login
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
+
+    try {
+        const { Auth } = Amplify;
+        await Auth.signIn(email, password);
+
+        // Hide modal and initialize app
+        hideAuthModal();
+        await init();
+
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = error.message || 'Failed to login. Please try again.';
+        errorDiv.classList.add('show');
+    }
+}
+
+// Handle signup
+let signupEmail = ''; // Store for verification
+async function handleSignup(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const errorDiv = document.getElementById('signup-error');
+    const successDiv = document.getElementById('signup-success');
+
+    try {
+        const { Auth } = Amplify;
+        await Auth.signUp({
+            username: email,
+            password: password,
+            attributes: {
+                name: name,
+                email: email
+            }
+        });
+
+        signupEmail = email;
+
+        // Show success and verification section
+        successDiv.textContent = 'Account created! Check your email for verification code.';
+        successDiv.classList.add('show');
+        errorDiv.classList.remove('show');
+
+        // Show verification section
+        document.getElementById('verification-section').classList.add('show');
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        errorDiv.textContent = error.message || 'Failed to create account. Please try again.';
+        errorDiv.classList.add('show');
+        successDiv.classList.remove('show');
+    }
+}
+
+// Handle email verification
+async function handleVerification() {
+    const code = document.getElementById('verification-code').value;
+    const errorDiv = document.getElementById('signup-error');
+    const successDiv = document.getElementById('signup-success');
+
+    if (!code || code.length !== 6) {
+        errorDiv.textContent = 'Please enter a valid 6-digit verification code.';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    try {
+        const { Auth } = Amplify;
+        await Auth.confirmSignUp(signupEmail, code);
+
+        successDiv.textContent = 'Email verified! You can now login.';
+        successDiv.classList.add('show');
+        errorDiv.classList.remove('show');
+
+        // Switch to login tab after 2 seconds
+        setTimeout(() => {
+            switchAuthTab('login');
+            document.getElementById('login-email').value = signupEmail;
+            document.getElementById('verification-section').classList.remove('show');
+        }, 2000);
+
+    } catch (error) {
+        console.error('Verification error:', error);
+        errorDiv.textContent = error.message || 'Invalid verification code. Please try again.';
+        errorDiv.classList.add('show');
+    }
+}
+
+// Resend verification code
+async function resendVerificationCode() {
+    try {
+        const { Auth } = Amplify;
+        await Auth.resendSignUp(signupEmail);
+        alert('Verification code sent! Check your email.');
+    } catch (error) {
+        console.error('Resend error:', error);
+        alert('Failed to resend code. Please try again.');
+    }
+}
+
+// Check password strength
+function checkPasswordStrength(password) {
+    const strengthBar = document.getElementById('password-strength-bar');
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]/)) strength++;
+    if (password.match(/[A-Z]/)) strength++;
+    if (password.match(/[0-9]/)) strength++;
+    if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+    strengthBar.className = 'password-strength-bar';
+    if (strength <= 2) {
+        strengthBar.classList.add('weak');
+    } else if (strength <= 4) {
+        strengthBar.classList.add('medium');
+    } else {
+        strengthBar.classList.add('strong');
+    }
+}
+
+// Show forgot password flow
+function showForgotPassword() {
+    const email = prompt('Enter your email to reset password:');
+    if (!email) return;
+
+    const { Auth } = Amplify;
+    Auth.forgotPassword(email)
+        .then(() => {
+            const code = prompt('Check your email for reset code and enter it here:');
+            if (!code) return;
+
+            const newPassword = prompt('Enter your new password:');
+            if (!newPassword) return;
+
+            return Auth.forgotPasswordSubmit(email, code, newPassword);
+        })
+        .then(() => {
+            alert('Password reset successful! You can now login with your new password.');
+        })
+        .catch(error => {
+            console.error('Password reset error:', error);
+            alert('Failed to reset password: ' + error.message);
+        });
+}
+
+// Handle logout
+async function handleLogout() {
+    if (!confirm('Are you sure you want to logout?')) return;
+
+    try {
+        const { Auth } = Amplify;
+        await Auth.signOut();
+        window.location.reload();
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('Failed to logout. Please try again.');
+    }
+}
+
+// Check for local data migration
+function checkForLocalDataMigration() {
+    const localData = localStorage.getItem('learnquest_user');
+    if (localData) {
+        const parsed = JSON.parse(localData);
+        if (parsed.chaptersCompleted > 0 || parsed.xp > 0) {
+            document.getElementById('migrate-section').style.display = 'block';
+        }
+    }
+}
+
+// Handle data migration from localStorage to backend
+async function handleDataMigration() {
+    try {
+        const success = await dataService.migrateLocalDataToBackend();
+        if (success) {
+            alert('✅ Data migrated successfully! Your progress is now in the cloud.');
+            document.getElementById('migrate-section').style.display = 'none';
+            await init(); // Reload app with backend data
+        }
+    } catch (error) {
+        console.error('Migration error:', error);
+        alert('Failed to migrate data: ' + error.message);
+    }
+}
+
+// Skip migration
+function skipMigration() {
+    document.getElementById('migrate-section').style.display = 'none';
+}
+
+// Add logout button to header (call this after authentication)
+function addLogoutButton() {
+    const headerRight = document.querySelector('.header-right');
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'logout-button';
+    logoutBtn.textContent = 'Logout';
+    logoutBtn.onclick = handleLogout;
+    headerRight.appendChild(logoutBtn);
+}
+
 // Initialize on load
 window.onload = init;
 
@@ -607,5 +966,11 @@ window.onclick = function(event) {
     const modal = document.getElementById('studyModal');
     if (event.target === modal) {
         closeModal();
+    }
+
+    const authModal = document.getElementById('auth-container');
+    if (event.target === authModal && !dataService.useBackend) {
+        // Only allow closing auth modal if backend is disabled
+        hideAuthModal();
     }
 }
