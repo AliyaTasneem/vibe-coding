@@ -148,13 +148,13 @@ async function init() {
         try {
             const { Auth } = Amplify;
             const user = await Auth.currentAuthenticatedUser();
-            console.log('User is authenticated:', user.attributes.email);
+            // User authenticated successfully
             document.getElementById('auth-container').classList.remove('show');
 
             // Check for local data migration
             checkForLocalDataMigration();
         } catch (error) {
-            console.log('User not authenticated, showing login modal');
+            // User not authenticated
             showAuthModal();
             return; // Don't load app until authenticated
         }

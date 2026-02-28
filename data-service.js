@@ -16,7 +16,7 @@ class DataService {
                 // Configure Amplify with the exported config
                 Amplify.configure(amplifyConfig);
                 this.isInitialized = true;
-                console.log('DataService initialized with AWS backend');
+                // DataService initialized successfully
             } catch (error) {
                 console.error('Failed to initialize Amplify:', error);
                 this.useBackend = false;
@@ -123,7 +123,7 @@ class DataService {
                 });
             }
 
-            console.log('Data saved to backend successfully');
+            // Data saved successfully
 
         } catch (error) {
             console.error('Error saving to backend:', error);
@@ -158,7 +158,7 @@ class DataService {
                 }
             });
 
-            console.log('Quiz result saved to backend');
+            // Quiz result saved successfully
 
         } catch (error) {
             console.error('Error saving quiz result:', error);
@@ -367,7 +367,7 @@ class DataService {
             // Auto-unsubscribe after 5 minutes to save costs
             setTimeout(() => {
                 subscription.unsubscribe();
-                console.log('Leaderboard subscription ended after 5 minutes');
+                // Leaderboard subscription ended (cost optimization)
             }, 300000);
 
             return subscription;

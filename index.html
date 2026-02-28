@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnQuest - Grade 10 CBSE</title>
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https:;
+        connect-src 'self' https://*.amazonaws.com https://*.amplifyapp.com;
+        font-src 'self';
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="quiz-styles.css">
     <link rel="stylesheet" href="auth-styles.css">
@@ -12,6 +26,17 @@
     <script src="https://cdn.jsdelivr.net/npm/aws-amplify@5/dist/aws-amplify.min.js"></script>
 </head>
 <body>
+    <!-- HTTPS Redirect for Production -->
+    <script>
+        // Force HTTPS in production (not on localhost)
+        if (window.location.protocol !== 'https:' &&
+            window.location.hostname !== 'localhost' &&
+            window.location.hostname !== '127.0.0.1' &&
+            window.location.hostname !== '') {
+            window.location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+        }
+    </script>
+
     <!-- Authentication Modal -->
     <div id="auth-container" class="auth-modal">
         <div class="auth-card">
@@ -265,6 +290,7 @@
         </div>
     </div>
 
+    <script src="logger.js"></script>
     <script src="amplify-config.js"></script>
     <script src="graphql-queries.js"></script>
     <script src="data-service.js"></script>
